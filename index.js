@@ -24,8 +24,14 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const sendMessage = async (user) => {
   const delay = Math.random() * process.env.MAXIMUM_DELAY_MINUTES * 60 * 1000;
+  console.log(`Delaying for ${delay}ms`);
   await sleep(delay);
-  await user.send("Drink water!");
+  console.log("Delay over - Should have sent message");
+  try {
+    await user.send("Drink water!");
+  } catch (e) {
+    console.error(`Did not send`, e);
+  }
 };
 
 CLIENT.once(Events.ClientReady, async (client) => {
