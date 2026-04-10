@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { Client, GatewayIntentBits, Events } from "discord.js";
+import { Client, GatewayIntentBits, Events, Partials } from "discord.js";
 import cron from "node-cron";
 
 const SCHEDULE = [
@@ -13,7 +13,11 @@ const SCHEDULE = [
 ];
 
 const CLIENT = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
+  intents: [
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.DirectMessageReactions,
+  ],
+  partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -36,6 +40,14 @@ CLIENT.once(Events.ClientReady, async (client) => {
       },
     );
   });
+});
+
+// Reacting with any emoji to the message will delete the message
+CLIENT.on(Events.MessageReactionAdd, async (reaction) => {
+  if (reaction.partial) {
+    await reaction.fetch();
+  }
+  await reaction.message.delete();
 });
 
 CLIENT.login(process.env.BOT_TOKEN);
