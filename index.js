@@ -2,21 +2,31 @@ import "dotenv/config";
 import { Client, GatewayIntentBits, Events } from "discord.js";
 import cron from "node-cron";
 
+import schedule from "./schedule.js";
+
 const CLIENT = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
 });
 
-const sendMessage = async (user) => await user.send("Drink water!");
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const sendMessage = async (user) => {
+  const delay = Math.random() * process.env.MAXIMUM_DELAY_MINUTES * 60 * 1000;
+  await sleep(delay);
+  await user.send("Drink water!");
+};
 
 CLIENT.once(Events.ClientReady, async (client) => {
   const user = await client.users.fetch(process.env.USER_ID);
 
-  // Send message every hour from 8pm to 1am EST
-  cron.schedule("0 20-23 * * *", () => sendMessage(user), {
-    timezone: "America/New_York",
-  });
-  cron.schedule("0 0-1 * * *", () => sendMessage(user), {
-    timezone: "America/New_York",
+  schedule.forEach((dayHours, index) => {
+    cron.schedule(
+      `0 ${dayHours.join(",")} * * ${index}`,
+      () => sendMessage(user),
+      {
+        timezone: "America/New_York",
+      },
+    );
   });
 });
 
