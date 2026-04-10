@@ -29,7 +29,7 @@ CLIENT.once(Events.ClientReady, async (client) => {
 
   SCHEDULE.forEach((dayHours, index) => {
     cron.schedule(
-      `0 ${dayHours.join(",")} * * ${index}`,
+      `0 ${JSON.parse(dayHours).join(",")} * * ${index}`,
       () => sendMessage(user),
       {
         timezone: "America/New_York",
