@@ -2,7 +2,15 @@ import "dotenv/config";
 import { Client, GatewayIntentBits, Events } from "discord.js";
 import cron from "node-cron";
 
-import schedule from "./schedule.js";
+const SCHEDULE = [
+  process.env.SCHEDULE_SUNDAY, // Sunday
+  process.env.SCHEDULE_MONDAY, // Monday
+  process.env.SCHEDULE_TUESDAY, // Tuesday
+  process.env.SCHEDULE_WEDNESDAY, // Wednesday
+  process.env.SCHEDULE_THURSDAY, // Thursday
+  process.env.SCHEDULE_FRIDAY, // Friday
+  process.env.SCHEDULE_SATURDAY, // Saturday
+];
 
 const CLIENT = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -19,7 +27,7 @@ const sendMessage = async (user) => {
 CLIENT.once(Events.ClientReady, async (client) => {
   const user = await client.users.fetch(process.env.USER_ID);
 
-  schedule.forEach((dayHours, index) => {
+  SCHEDULE.forEach((dayHours, index) => {
     cron.schedule(
       `0 ${dayHours.join(",")} * * ${index}`,
       () => sendMessage(user),
